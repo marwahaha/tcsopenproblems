@@ -1,0 +1,518 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --text: #2c3e50;
+    --text-light: #666;
+    --bg: #fafafa;
+    --card-bg: #fff;
+    --border: #e0e0e0;
+    --accent: #3498db;
+    --accent-dark: #2980b9;
+}
+
+body {
+    font-family: Georgia, 'Times New Roman', serif;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Navigation */
+nav {
+    background: var(--card-bg);
+    padding: 1rem 2rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+nav .logo {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: var(--text);
+    text-decoration: none;
+}
+
+nav .nav-links a {
+    margin-left: 2rem;
+    color: var(--text-light);
+    text-decoration: none;
+    font-size: 0.95rem;
+}
+
+nav .nav-links a:hover {
+    color: var(--accent);
+}
+
+nav .user-info {
+    margin-left: 2rem;
+    color: var(--text);
+    font-size: 0.95rem;
+    font-weight: bold;
+}
+
+/* Main Content */
+main {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    flex: 1;
+    width: 100%;
+}
+
+/* Hero */
+.hero {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 2rem 0;
+}
+
+.hero h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: normal;
+}
+
+.hero p {
+    color: var(--text-light);
+    font-size: 1.1rem;
+}
+
+/* Problem Cards */
+.problems-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.problem-card {
+    background: var(--card-bg);
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+}
+
+.problem-card h2 {
+    font-size: 1.3rem;
+    font-weight: normal;
+    margin-bottom: 0.5rem;
+}
+
+.problem-card h2 a {
+    color: var(--text);
+    text-decoration: none;
+}
+
+.problem-card h2 a:hover {
+    color: var(--accent);
+}
+
+.problem-card .preview {
+    color: var(--text-light);
+    margin: 0.75rem 0;
+    font-size: 0.95rem;
+}
+
+.problem-card .meta {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    display: flex;
+    justify-content: space-between;
+}
+
+.category {
+    display: inline-block;
+    background: #f0f0f0;
+    padding: 0.2rem 0.6rem;
+    border-radius: 3px;
+    font-size: 0.8rem;
+    color: var(--text-light);
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Problem Detail */
+.problem-detail {
+    background: var(--card-bg);
+    padding: 2rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 2rem;
+}
+
+.problem-detail h1 {
+    font-size: 1.8rem;
+    font-weight: normal;
+    margin-bottom: 0.75rem;
+}
+
+.problem-detail .meta {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-bottom: 1.5rem;
+}
+
+.problem-detail .meta span {
+    margin-right: 1.5rem;
+}
+
+.problem-detail .description {
+    white-space: pre-wrap;
+}
+
+/* Discussion */
+.discussion {
+    margin-bottom: 2rem;
+}
+
+.discussion h2 {
+    font-size: 1.3rem;
+    font-weight: normal;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.comments {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.comment {
+    background: var(--card-bg);
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+}
+
+.comment-header {
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.comment-header strong {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.comment-date {
+    color: var(--text-light);
+    margin-left: 1rem;
+}
+
+.comment p {
+    white-space: pre-wrap;
+}
+
+.no-comments {
+    color: var(--text-light);
+    font-style: italic;
+    margin-bottom: 2rem;
+}
+
+/* Forms */
+.submit-form,
+.comment-form {
+    background: var(--card-bg);
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+}
+
+.submit-page h1,
+.about-page h1 {
+    font-size: 2rem;
+    font-weight: normal;
+    margin-bottom: 1rem;
+}
+
+.submit-page > p {
+    color: var(--text-light);
+    margin-bottom: 2rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+input[type="text"],
+textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+input[type="text"]:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+button {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+button:hover {
+    background: var(--accent-dark);
+}
+
+.comment-form h3 {
+    font-size: 1.1rem;
+    font-weight: normal;
+    margin-bottom: 1rem;
+}
+
+/* About Page */
+.about-page h2 {
+    font-size: 1.4rem;
+    font-weight: normal;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+}
+
+.about-page ul {
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.about-page li {
+    margin-bottom: 0.5rem;
+}
+
+/* Flash Messages */
+.flash {
+    background: #e8f4f8;
+    border: 1px solid #bee5eb;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1.5rem;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-light);
+}
+
+.empty-state a {
+    color: var(--accent);
+}
+
+/* Back Link */
+.back-link {
+    display: inline-block;
+    color: var(--text-light);
+    text-decoration: none;
+    font-size: 0.95rem;
+}
+
+.back-link:hover {
+    color: var(--accent);
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-light);
+    font-size: 0.9rem;
+    border-top: 1px solid var(--border);
+}
+
+/* Content with Sidebar */
+.content-with-sidebar {
+    display: flex;
+    gap: 2rem;
+}
+
+.content-with-sidebar .problems-list {
+    flex: 1;
+}
+
+.sidebar {
+    width: 200px;
+    flex-shrink: 0;
+}
+
+.sidebar h3 {
+    font-size: 1rem;
+    font-weight: normal;
+    margin-bottom: 1rem;
+    color: var(--text-light);
+}
+
+.category-list {
+    list-style: none;
+}
+
+.category-list li {
+    margin-bottom: 0.5rem;
+}
+
+.category-list a {
+    color: var(--text);
+    text-decoration: none;
+    font-size: 0.95rem;
+}
+
+.category-list a:hover {
+    color: var(--accent);
+}
+
+.category-list li.active a {
+    color: var(--accent);
+    font-weight: bold;
+}
+
+/* Auth Pages */
+.auth-page {
+    max-width: 400px;
+    margin: 2rem auto;
+}
+
+.auth-page h1 {
+    font-size: 2rem;
+    font-weight: normal;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.auth-form {
+    background: var(--card-bg);
+    padding: 2rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+}
+
+.auth-form small {
+    display: block;
+    color: var(--text-light);
+    font-size: 0.85rem;
+    margin-top: -1rem;
+    margin-bottom: 1rem;
+}
+
+input[type="password"] {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+input[type="password"]:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.auth-link {
+    text-align: center;
+    margin-top: 1.5rem;
+    color: var(--text-light);
+}
+
+.auth-link a {
+    color: var(--accent);
+}
+
+/* Login Prompt */
+.login-prompt {
+    background: var(--card-bg);
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    text-align: center;
+    color: var(--text-light);
+}
+
+.login-prompt a {
+    color: var(--accent);
+}
+
+/* Category as link */
+a.category {
+    text-decoration: none;
+}
+
+a.category:hover {
+    background: #e0e0e0;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    nav {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    nav .nav-links a {
+        margin-left: 1rem;
+    }
+
+    nav .nav-links a:first-child {
+        margin-left: 0;
+    }
+
+    main {
+        padding: 1rem;
+    }
+
+    .hero h1 {
+        font-size: 2rem;
+    }
+
+    .content-with-sidebar {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        order: -1;
+    }
+
+    .category-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .category-list li {
+        margin: 0;
+    }
+
+    .category-list a {
+        display: inline-block;
+        background: #f0f0f0;
+        padding: 0.25rem 0.75rem;
+        border-radius: 3px;
+    }
+}

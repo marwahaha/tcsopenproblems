@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}{{ problem.title }} - Open Problems{% endblock %}
+
+{% block content %}
+<article class="problem-detail">
+    <header>
+        <h1>{{ problem.title }}</h1>
+        {% if problem.category %}
+            <a href="{{ url_for('category', name=problem.category) }}" class="category">{{ problem.category }}</a>
+        {% endif %}
+        <div class="meta">
+            <span>by {{ problem.username }}</span>
+            <span>{{ problem.created_at[:10] }}</span>
+        </div>
+    </header>
+
+    <div class="description">
+        {{ problem.description | safe }}
+    </div>
+</article>
+
+<section class="discussion">
+    <h2>Discussion ({{ comments|length }})</h2>
+
+    {% if comments %}
+        <div class="comments">
+            {% for comment in comments %}
+            <div class="comment">
+                <div class="comment-header">
+                    <strong>{{ comment.username }}</strong>
+                    <span class="comment-date">{{ comment.created_at[:16] }}</span>
+                </div>
+                <p>{{ comment.content }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="no-comments">No comments yet. Start the discussion!</p>
+    {% endif %}
+
+    {% if current_user %}
+    <form class="comment-form" action="{{ url_for('add_comment', id=problem.id) }}" method="POST">
+        <h3>Add a Comment</h3>
+        <textarea name="content" placeholder="Share your thoughts, partial solutions, or related ideas..." required rows="4"></textarea>
+        <button type="submit">Post Comment</button>
+    </form>
+    {% else %}
+    <div class="login-prompt">
+        <p><a href="{{ url_for('login') }}">Log in</a> to join the discussion.</p>
+    </div>
+    {% endif %}
+</section>
+
+<a href="{{ url_for('index') }}" class="back-link">&larr; Back to all problems</a>
+{% endblock %}

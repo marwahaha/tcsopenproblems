@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Submit a Problem - Open Problems{% endblock %}
+
+{% block content %}
+<div class="submit-page">
+    <h1>Submit a Problem</h1>
+    <p>Share an open problem with the community. Please describe it clearly so others can understand and work on it.</p>
+
+    <form class="submit-form" method="POST">
+        <label for="title">Problem Title *</label>
+        <input type="text" id="title" name="title" placeholder="A concise title for the problem" required>
+
+        <label for="category">Category</label>
+        <input type="text" id="category" name="category" placeholder="e.g., Graph Theory, Number Theory, Combinatorics">
+
+        <label for="description">Description *</label>
+        <textarea id="description" name="description" rows="12" placeholder="Describe the problem in detail. Include any relevant background, known partial results, or why the problem is interesting." required></textarea>
+
+        <button type="submit">Submit Problem</button>
+    </form>
+</div>
+{% endblock %}

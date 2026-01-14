@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}{{ current_category }} - Open Problems{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h1>{{ current_category }}</h1>
+    <p><a href="{{ url_for('index') }}">&larr; All problems</a></p>
+</div>
+
+<div class="content-with-sidebar">
+    <section class="problems-list">
+        {% if problems %}
+            {% for problem in problems %}
+            <article class="problem-card">
+                <a href="{{ url_for('problem', id=problem.id) }}">
+                    <h2>{{ problem.title }}</h2>
+                </a>
+                <p class="preview">{{ problem.description[:200] }}{% if problem.description|length > 200 %}...{% endif %}</p>
+                <div class="meta">
+                    <span>by {{ problem.username }}</span>
+                    <span>{{ problem.created_at[:10] }}</span>
+                </div>
+            </article>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <p>No problems in this category yet.</p>
+            </div>
+        {% endif %}
+    </section>
+
+    {% if categories %}
+    <aside class="sidebar">
+        <h3>Categories</h3>
+        <ul class="category-list">
+            {% for cat in categories %}
+                <li {% if cat.category == current_category %}class="active"{% endif %}>
+                    <a href="{{ url_for('category', name=cat.category) }}">{{ cat.category }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </aside>
+    {% endif %}
+</div>
+{% endblock %}
