@@ -54,6 +54,15 @@ def init_db():
             FOREIGN KEY (problem_id) REFERENCES problems (id),
             FOREIGN KEY (user_id) REFERENCES users (id)
         );
+
+        CREATE TABLE IF NOT EXISTS votes (
+            user_id INTEGER NOT NULL,
+            problem_id INTEGER NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (user_id, problem_id),
+            FOREIGN KEY (user_id) REFERENCES users (id),
+            FOREIGN KEY (problem_id) REFERENCES problems (id)
+        );
     ''')
     conn.commit()
     conn.close()
@@ -81,16 +90,24 @@ def add_categories_to_problem(conn, problem_id, category_string):
         return
     categories = [c.strip() for c in category_string.split(',') if c.strip()]
     for cat_name in categories:
-        # Get or create category
         existing = conn.execute('SELECT id FROM categories WHERE name = ?', (cat_name,)).fetchone()
         if existing:
             cat_id = existing['id']
         else:
             cursor = conn.execute('INSERT INTO categories (name) VALUES (?)', (cat_name,))
             cat_id = cursor.lastrowid
-        # Link to problem
         conn.execute('INSERT OR IGNORE INTO problem_categories (problem_id, category_id) VALUES (?, ?)',
                     (problem_id, cat_id))
+
+def get_vote_count(conn, problem_id):
+    """Get the number of votes for a problem."""
+    result = conn.execute('SELECT COUNT(*) as count FROM votes WHERE problem_id = ?', (problem_id,)).fetchone()
+    return result['count']
+
+def user_has_voted(conn, user_id, problem_id):
+    """Check if a user has voted for a problem."""
+    result = conn.execute('SELECT 1 FROM votes WHERE user_id = ? AND problem_id = ?', (user_id, problem_id)).fetchone()
+    return result is not None
 
 def get_current_user():
     if 'user_id' in session:
@@ -176,38 +193,58 @@ def logout():
 @app.route('/')
 def index():
     conn = get_db()
+    # Get problems sorted by vote count (descending), then by date
     problems = conn.execute('''
-        SELECT p.*, u.username FROM problems p
+        SELECT p.*, u.username,
+               (SELECT COUNT(*) FROM votes v WHERE v.problem_id = p.id) as vote_count
+        FROM problems p
         JOIN users u ON p.user_id = u.id
-        ORDER BY p.created_at DESC
+        ORDER BY vote_count DESC, p.created_at DESC
     ''').fetchall()
-    # Add categories to each problem
-    problems_with_cats = []
+
+    user_id = session.get('user_id')
+    problems_with_data = []
     for p in problems:
         cats = get_categories_for_problem(conn, p['id'])
-        problems_with_cats.append({'problem': p, 'categories': cats})
+        has_voted = user_has_voted(conn, user_id, p['id']) if user_id else False
+        problems_with_data.append({
+            'problem': p,
+            'categories': cats,
+            'vote_count': p['vote_count'],
+            'has_voted': has_voted
+        })
     categories = get_all_categories(conn)
     conn.close()
-    return render_template('index.html', problems=problems_with_cats, categories=categories)
+    return render_template('index.html', problems=problems_with_data, categories=categories)
 
 @app.route('/category/<name>')
 def category(name):
     conn = get_db()
     problems = conn.execute('''
-        SELECT p.*, u.username FROM problems p
+        SELECT p.*, u.username,
+               (SELECT COUNT(*) FROM votes v WHERE v.problem_id = p.id) as vote_count
+        FROM problems p
         JOIN users u ON p.user_id = u.id
         JOIN problem_categories pc ON p.id = pc.problem_id
         JOIN categories c ON pc.category_id = c.id
         WHERE c.name = ?
-        ORDER BY p.created_at DESC
+        ORDER BY vote_count DESC, p.created_at DESC
     ''', (name,)).fetchall()
-    problems_with_cats = []
+
+    user_id = session.get('user_id')
+    problems_with_data = []
     for p in problems:
         cats = get_categories_for_problem(conn, p['id'])
-        problems_with_cats.append({'problem': p, 'categories': cats})
+        has_voted = user_has_voted(conn, user_id, p['id']) if user_id else False
+        problems_with_data.append({
+            'problem': p,
+            'categories': cats,
+            'vote_count': p['vote_count'],
+            'has_voted': has_voted
+        })
     categories = get_all_categories(conn)
     conn.close()
-    return render_template('category.html', problems=problems_with_cats, categories=categories, current_category=name)
+    return render_template('category.html', problems=problems_with_data, categories=categories, current_category=name)
 
 @app.route('/problem/<int:id>')
 def problem(id):
@@ -221,7 +258,12 @@ def problem(id):
         conn.close()
         flash('Problem not found')
         return redirect(url_for('index'))
+
     categories = get_categories_for_problem(conn, id)
+    vote_count = get_vote_count(conn, id)
+    user_id = session.get('user_id')
+    has_voted = user_has_voted(conn, user_id, id) if user_id else False
+
     comments = conn.execute('''
         SELECT c.*, u.username FROM comments c
         JOIN users u ON c.user_id = u.id
@@ -229,7 +271,30 @@ def problem(id):
         ORDER BY c.created_at ASC
     ''', (id,)).fetchall()
     conn.close()
-    return render_template('problem.html', problem=problem, categories=categories, comments=comments)
+    return render_template('problem.html', problem=problem, categories=categories,
+                         comments=comments, vote_count=vote_count, has_voted=has_voted)
+
+@app.route('/problem/<int:id>/vote', methods=['POST'])
+@login_required
+def vote(id):
+    conn = get_db()
+    user_id = session['user_id']
+
+    # Check if already voted
+    existing = conn.execute('SELECT 1 FROM votes WHERE user_id = ? AND problem_id = ?',
+                           (user_id, id)).fetchone()
+    if existing:
+        # Remove vote
+        conn.execute('DELETE FROM votes WHERE user_id = ? AND problem_id = ?', (user_id, id))
+    else:
+        # Add vote
+        conn.execute('INSERT INTO votes (user_id, problem_id) VALUES (?, ?)', (user_id, id))
+
+    conn.commit()
+    conn.close()
+
+    # Return to referring page or problem page
+    return redirect(request.referrer or url_for('problem', id=id))
 
 @app.route('/submit', methods=['GET', 'POST'])
 @login_required

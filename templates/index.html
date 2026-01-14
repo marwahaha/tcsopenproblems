@@ -13,20 +13,37 @@
         {% if problems %}
             {% for item in problems %}
             <article class="problem-card">
-                <a href="{{ url_for('problem', id=item.problem.id) }}">
-                    <h2>{{ item.problem.title }}</h2>
-                </a>
-                {% if item.categories %}
-                    <div class="categories">
-                        {% for cat in item.categories %}
-                            <a href="{{ url_for('category', name=cat.name) }}" class="category">{{ cat.name }}</a>
-                        {% endfor %}
+                <div class="problem-content">
+                    <a href="{{ url_for('problem', id=item.problem.id) }}">
+                        <h2>{{ item.problem.title }}</h2>
+                    </a>
+                    {% if item.categories %}
+                        <div class="categories">
+                            {% for cat in item.categories %}
+                                <a href="{{ url_for('category', name=cat.name) }}" class="category">{{ cat.name }}</a>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <p class="preview">{{ item.problem.description[:200] }}{% if item.problem.description|length > 200 %}...{% endif %}</p>
+                    <div class="meta">
+                        <span>by {{ item.problem.username }}</span>
+                        <span>{{ item.problem.created_at[:10] }}</span>
                     </div>
-                {% endif %}
-                <p class="preview">{{ item.problem.description[:200] }}{% if item.problem.description|length > 200 %}...{% endif %}</p>
-                <div class="meta">
-                    <span>by {{ item.problem.username }}</span>
-                    <span>{{ item.problem.created_at[:10] }}</span>
+                </div>
+                <div class="vote-section">
+                    {% if current_user %}
+                        <form action="{{ url_for('vote', id=item.problem.id) }}" method="POST">
+                            <button type="submit" class="vote-btn {% if item.has_voted %}voted{% endif %}">
+                                <span class="vote-arrow">&#9650;</span>
+                                <span class="vote-count">{{ item.vote_count }}</span>
+                            </button>
+                        </form>
+                    {% else %}
+                        <div class="vote-btn disabled">
+                            <span class="vote-arrow">&#9650;</span>
+                            <span class="vote-count">{{ item.vote_count }}</span>
+                        </div>
+                    {% endif %}
                 </div>
             </article>
             {% endfor %}

@@ -98,6 +98,12 @@ main {
     padding: 1.5rem;
     border: 1px solid var(--border);
     border-radius: 4px;
+    display: flex;
+    gap: 1rem;
+}
+
+.problem-content {
+    flex: 1;
 }
 
 .problem-card h2 {
@@ -150,6 +156,72 @@ main {
     color: white;
 }
 
+/* Vote Section */
+.vote-section {
+    display: flex;
+    align-items: flex-start;
+}
+
+.vote-section form {
+    margin: 0;
+}
+
+.vote-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--card-bg);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.vote-btn:hover {
+    border-color: var(--accent);
+    background: #f8f9fa;
+}
+
+.vote-btn.voted {
+    border-color: var(--accent);
+    background: #e8f4fc;
+}
+
+.vote-btn.voted .vote-arrow {
+    color: var(--accent);
+}
+
+.vote-btn.disabled {
+    cursor: default;
+    opacity: 0.7;
+}
+
+.vote-arrow {
+    font-size: 1rem;
+    color: var(--text-light);
+    line-height: 1;
+}
+
+.vote-count {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: var(--text);
+}
+
+.vote-section.large .vote-btn {
+    padding: 0.75rem 1rem;
+}
+
+.vote-section.large .vote-arrow {
+    font-size: 1.25rem;
+}
+
+.vote-section.large .vote-count {
+    font-size: 1.1rem;
+}
+
 /* Problem Detail */
 .problem-detail {
     background: var(--card-bg);
@@ -177,6 +249,18 @@ main {
 
 .problem-detail .description {
     white-space: pre-wrap;
+}
+
+.problem-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.problem-header-content {
+    flex: 1;
 }
 
 /* Discussion */

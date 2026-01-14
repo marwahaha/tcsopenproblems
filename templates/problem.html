@@ -4,20 +4,37 @@
 
 {% block content %}
 <article class="problem-detail">
-    <header>
-        <h1>{{ problem.title }}</h1>
-        {% if categories %}
-            <div class="categories">
-                {% for cat in categories %}
-                    <a href="{{ url_for('category', name=cat.name) }}" class="category">{{ cat.name }}</a>
-                {% endfor %}
+    <div class="problem-header">
+        <div class="problem-header-content">
+            <h1>{{ problem.title }}</h1>
+            {% if categories %}
+                <div class="categories">
+                    {% for cat in categories %}
+                        <a href="{{ url_for('category', name=cat.name) }}" class="category">{{ cat.name }}</a>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <div class="meta">
+                <span>by {{ problem.username }}</span>
+                <span>{{ problem.created_at[:10] }}</span>
             </div>
-        {% endif %}
-        <div class="meta">
-            <span>by {{ problem.username }}</span>
-            <span>{{ problem.created_at[:10] }}</span>
         </div>
-    </header>
+        <div class="vote-section large">
+            {% if current_user %}
+                <form action="{{ url_for('vote', id=problem.id) }}" method="POST">
+                    <button type="submit" class="vote-btn {% if has_voted %}voted{% endif %}">
+                        <span class="vote-arrow">&#9650;</span>
+                        <span class="vote-count">{{ vote_count }}</span>
+                    </button>
+                </form>
+            {% else %}
+                <div class="vote-btn disabled">
+                    <span class="vote-arrow">&#9650;</span>
+                    <span class="vote-count">{{ vote_count }}</span>
+                </div>
+            {% endif %}
+        </div>
+    </div>
 
     <div class="description">
         {{ problem.description | safe }}
