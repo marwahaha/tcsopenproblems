@@ -15,6 +15,9 @@
                 <a href="{{ url_for('submit') }}">Submit</a>
             {% endif %}
             <a href="{{ url_for('about') }}">About</a>
+            {% if is_admin %}
+                <a href="{{ url_for('admin_dashboard') }}" class="admin-link">Admin</a>
+            {% endif %}
             {% if current_user %}
                 <span class="user-info">{{ current_user.username }}</span>
                 <a href="{{ url_for('logout') }}">Logout</a>

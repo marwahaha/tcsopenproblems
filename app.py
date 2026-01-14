@@ -20,6 +20,7 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
             password_hash TEXT NOT NULL,
+            is_admin INTEGER DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
@@ -76,6 +77,14 @@ def init_db():
         );
     ''')
     conn.commit()
+
+    # Add is_admin column if it doesn't exist (for existing databases)
+    try:
+        conn.execute('ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0')
+        conn.commit()
+    except sqlite3.OperationalError:
+        pass  # Column already exists
+
     conn.close()
 
 def get_categories_for_problem(conn, problem_id):
@@ -149,7 +158,11 @@ def get_current_user():
 
 @app.context_processor
 def inject_user():
-    return {'current_user': get_current_user()}
+    user = get_current_user()
+    return {
+        'current_user': user,
+        'is_admin': user['is_admin'] if user else False
+    }
 
 def login_required(f):
     @wraps(f)
@@ -157,6 +170,19 @@ def login_required(f):
         if 'user_id' not in session:
             flash('Please log in to continue')
             return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated
+
+def admin_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if 'user_id' not in session:
+            flash('Please log in to continue')
+            return redirect(url_for('login'))
+        user = get_current_user()
+        if not user or not user['is_admin']:
+            flash('Admin access required')
+            return redirect(url_for('index'))
         return f(*args, **kwargs)
     return decorated
 
@@ -412,6 +438,155 @@ def add_comment(id):
 @app.route('/about')
 def about():
     return render_template('about.html')
+
+# Admin routes
+@app.route('/admin')
+@admin_required
+def admin_dashboard():
+    conn = get_db()
+    categories = conn.execute('SELECT * FROM categories ORDER BY name').fetchall()
+    conn.close()
+    return render_template('admin/dashboard.html', categories=categories)
+
+@app.route('/admin/problem/<int:id>/edit', methods=['GET', 'POST'])
+@admin_required
+def admin_edit_problem(id):
+    conn = get_db()
+    problem = conn.execute('SELECT * FROM problems WHERE id = ?', (id,)).fetchone()
+    if not problem:
+        conn.close()
+        flash('Problem not found')
+        return redirect(url_for('admin_dashboard'))
+
+    if request.method == 'POST':
+        title = request.form['title'].strip()
+        description = request.form['description'].strip()
+        category_string = request.form.get('categories', '').strip()
+
+        if not title or not description:
+            flash('Title and description are required')
+            categories = get_categories_for_problem(conn, id)
+            category_string = ', '.join([c['name'] for c in categories])
+            conn.close()
+            return render_template('admin/edit_problem.html', problem=problem, category_string=category_string)
+
+        conn.execute('UPDATE problems SET title = ?, description = ? WHERE id = ?',
+                    (title, description, id))
+        # Update categories - remove old ones and add new ones
+        conn.execute('DELETE FROM problem_categories WHERE problem_id = ?', (id,))
+        add_categories_to_problem(conn, id, category_string)
+        conn.commit()
+        conn.close()
+        flash('Problem updated successfully')
+        return redirect(url_for('problem', id=id))
+
+    categories = get_categories_for_problem(conn, id)
+    category_string = ', '.join([c['name'] for c in categories])
+    conn.close()
+    return render_template('admin/edit_problem.html', problem=problem, category_string=category_string)
+
+@app.route('/admin/problem/<int:id>/delete', methods=['POST'])
+@admin_required
+def admin_delete_problem(id):
+    conn = get_db()
+    # Delete related data first (foreign key constraints)
+    conn.execute('DELETE FROM problem_categories WHERE problem_id = ?', (id,))
+    conn.execute('DELETE FROM comments WHERE problem_id = ?', (id,))
+    conn.execute('DELETE FROM votes WHERE problem_id = ?', (id,))
+    conn.execute('DELETE FROM ratings WHERE problem_id = ?', (id,))
+    conn.execute('DELETE FROM problems WHERE id = ?', (id,))
+    conn.commit()
+    conn.close()
+    flash('Problem deleted successfully')
+    return redirect(url_for('index'))
+
+@app.route('/admin/comment/<int:id>/edit', methods=['GET', 'POST'])
+@admin_required
+def admin_edit_comment(id):
+    conn = get_db()
+    comment = conn.execute('SELECT * FROM comments WHERE id = ?', (id,)).fetchone()
+    if not comment:
+        conn.close()
+        flash('Comment not found')
+        return redirect(url_for('admin_dashboard'))
+
+    if request.method == 'POST':
+        content = request.form['content'].strip()
+        if not content:
+            flash('Comment cannot be empty')
+            conn.close()
+            return render_template('admin/edit_comment.html', comment=comment)
+
+        conn.execute('UPDATE comments SET content = ? WHERE id = ?', (content, id))
+        conn.commit()
+        problem_id = comment['problem_id']
+        conn.close()
+        flash('Comment updated successfully')
+        return redirect(url_for('problem', id=problem_id))
+
+    conn.close()
+    return render_template('admin/edit_comment.html', comment=comment)
+
+@app.route('/admin/comment/<int:id>/delete', methods=['POST'])
+@admin_required
+def admin_delete_comment(id):
+    conn = get_db()
+    comment = conn.execute('SELECT problem_id FROM comments WHERE id = ?', (id,)).fetchone()
+    if comment:
+        problem_id = comment['problem_id']
+        conn.execute('DELETE FROM comments WHERE id = ?', (id,))
+        conn.commit()
+        conn.close()
+        flash('Comment deleted successfully')
+        return redirect(url_for('problem', id=problem_id))
+    conn.close()
+    flash('Comment not found')
+    return redirect(url_for('index'))
+
+@app.route('/admin/category/<int:id>/edit', methods=['GET', 'POST'])
+@admin_required
+def admin_edit_category(id):
+    conn = get_db()
+    category = conn.execute('SELECT * FROM categories WHERE id = ?', (id,)).fetchone()
+    if not category:
+        conn.close()
+        flash('Category not found')
+        return redirect(url_for('admin_dashboard'))
+
+    if request.method == 'POST':
+        name = request.form['name'].strip()
+        if not name:
+            flash('Category name cannot be empty')
+            conn.close()
+            return render_template('admin/edit_category.html', category=category)
+
+        # Check if name is already taken by another category
+        existing = conn.execute('SELECT id FROM categories WHERE name = ? AND id != ?', (name, id)).fetchone()
+        if existing:
+            flash('Category name already exists')
+            conn.close()
+            return render_template('admin/edit_category.html', category=category)
+
+        conn.execute('UPDATE categories SET name = ? WHERE id = ?', (name, id))
+        conn.commit()
+        conn.close()
+        flash('Category updated successfully')
+        return redirect(url_for('admin_dashboard'))
+
+    conn.close()
+    return render_template('admin/edit_category.html', category=category)
+
+@app.route('/admin/category/<int:id>/delete', methods=['POST'])
+@admin_required
+def admin_delete_category(id):
+    conn = get_db()
+    # Remove category associations first
+    conn.execute('DELETE FROM problem_categories WHERE category_id = ?', (id,))
+    conn.execute('DELETE FROM categories WHERE id = ?', (id,))
+    conn.commit()
+    conn.close()
+    flash('Category deleted successfully')
+    return redirect(url_for('admin_dashboard'))
 
 if __name__ == '__main__':
     init_db()

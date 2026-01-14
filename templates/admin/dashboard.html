@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Open Problems{% endblock %}
+
+{% block content %}
+<div class="admin-page">
+    <h1>Admin Dashboard</h1>
+
+    <section class="admin-section">
+        <h2>Manage Categories</h2>
+        {% if categories %}
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Category Name</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cat in categories %}
+                    <tr>
+                        <td>{{ cat.name }}</td>
+                        <td class="actions">
+                            <a href="{{ url_for('admin_edit_category', id=cat.id) }}" class="btn-small">Edit</a>
+                            <form action="{{ url_for('admin_delete_category', id=cat.id) }}" method="POST" class="inline" onsubmit="return confirm('Delete this category?');">
+                                <button type="submit" class="btn-small btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No categories yet.</p>
+        {% endif %}
+    </section>
+
+    <section class="admin-section">
+        <h2>Quick Links</h2>
+        <ul>
+            <li><a href="{{ url_for('index') }}">View all problems</a> (edit/delete buttons visible on problem pages)</li>
+        </ul>
+    </section>
+</div>
+{% endblock %}

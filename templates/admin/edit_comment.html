@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Comment - Admin{% endblock %}
+
+{% block content %}
+<div class="admin-page">
+    <h1>Edit Comment</h1>
+
+    <form class="admin-form" method="POST">
+        <label for="content">Comment</label>
+        <textarea id="content" name="content" rows="6" required>{{ comment.content }}</textarea>
+
+        <div class="form-actions">
+            <button type="submit">Save Changes</button>
+            <a href="{{ url_for('problem', id=comment.problem_id) }}" class="btn-cancel">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

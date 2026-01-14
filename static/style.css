@@ -726,3 +726,135 @@ a.category:hover {
         border-radius: 3px;
     }
 }
+
+/* Admin Styles */
+.admin-link {
+    color: #e74c3c !important;
+}
+
+.admin-page {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.admin-page h1 {
+    font-size: 2rem;
+    font-weight: normal;
+    margin-bottom: 2rem;
+}
+
+.admin-section {
+    background: var(--card-bg);
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 2rem;
+}
+
+.admin-section h2 {
+    font-size: 1.3rem;
+    font-weight: normal;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+
+.admin-table th {
+    font-weight: bold;
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+.admin-table .actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.admin-form {
+    background: var(--card-bg);
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.btn-cancel {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: #f0f0f0;
+    color: var(--text);
+    text-decoration: none;
+    border-radius: 4px;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.btn-cancel:hover {
+    background: #e0e0e0;
+}
+
+.btn-small {
+    display: inline-block;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    background: var(--accent);
+    color: white;
+    text-decoration: none;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.btn-small:hover {
+    background: var(--accent-dark);
+}
+
+.btn-danger {
+    background: #e74c3c;
+}
+
+.btn-danger:hover {
+    background: #c0392b;
+}
+
+.inline {
+    display: inline;
+}
+
+.admin-actions {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 0.5rem;
+}
+
+.admin-comment-actions {
+    margin-left: auto;
+    display: inline-flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.comment-header {
+    display: flex;
+    align-items: center;
+}

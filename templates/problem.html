@@ -54,6 +54,15 @@
     <div class="description">
         {{ problem.description | safe }}
     </div>
+
+    {% if is_admin %}
+    <div class="admin-actions">
+        <a href="{{ url_for('admin_edit_problem', id=problem.id) }}" class="btn-small">Edit Problem</a>
+        <form action="{{ url_for('admin_delete_problem', id=problem.id) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this problem? This cannot be undone.');">
+            <button type="submit" class="btn-small btn-danger">Delete Problem</button>
+        </form>
+    </div>
+    {% endif %}
 </article>
 
 {% if current_user %}
@@ -104,6 +113,14 @@
                 <div class="comment-header">
                     <strong>{{ comment.username }}</strong>
                     <span class="comment-date">{{ comment.created_at[:16] }}</span>
+                    {% if is_admin %}
+                    <span class="admin-comment-actions">
+                        <a href="{{ url_for('admin_edit_comment', id=comment.id) }}" class="btn-small">Edit</a>
+                        <form action="{{ url_for('admin_delete_comment', id=comment.id) }}" method="POST" class="inline" onsubmit="return confirm('Delete this comment?');">
+                            <button type="submit" class="btn-small btn-danger">Delete</button>
+                        </form>
+                    </span>
+                    {% endif %}
                 </div>
                 <p>{{ comment.content }}</p>
             </div>

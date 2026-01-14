@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Category - Admin{% endblock %}
+
+{% block content %}
+<div class="admin-page">
+    <h1>Edit Category</h1>
+
+    <form class="admin-form" method="POST">
+        <label for="name">Category Name</label>
+        <input type="text" id="name" name="name" value="{{ category.name }}" required>
+
+        <div class="form-actions">
+            <button type="submit">Save Changes</button>
+            <a href="{{ url_for('admin_dashboard') }}" class="btn-cancel">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
