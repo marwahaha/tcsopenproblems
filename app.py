@@ -12,8 +12,27 @@ DATABASE = 'problems.db'
 
 @app.template_filter('markdown')
 def markdown_filter(text):
-    """Convert markdown text to HTML."""
-    return Markup(markdown.markdown(text))
+    """Convert markdown text to HTML, preserving LaTeX."""
+    import re
+    # Preserve LaTeX blocks by replacing them with placeholders
+    latex_blocks = []
+
+    def save_latex(match):
+        latex_blocks.append(match.group(0))
+        return f'LATEXBLOCK{len(latex_blocks)-1}ENDLATEX'
+
+    # Save display math ($$...$$) and inline math ($...$)
+    text = re.sub(r'\$\$[\s\S]+?\$\$', save_latex, text)
+    text = re.sub(r'\$[^\$\n]+?\$', save_latex, text)
+
+    # Process markdown
+    html = markdown.markdown(text)
+
+    # Restore LaTeX blocks
+    for i, block in enumerate(latex_blocks):
+        html = html.replace(f'LATEXBLOCK{i}ENDLATEX', block)
+
+    return Markup(html)
 
 def get_db():
     conn = sqlite3.connect(DATABASE)
