@@ -1,18 +1,39 @@
 {% extends "base.html" %}
 
-{% block title %}Open Problems - Home{% endblock %}
+{% block title %}TCS Open Problems{% endblock %}
 
 {% block content %}
 <div class="hero">
-    <h1>Open Problems</h1>
-    <p>A curated list of unsolved problems awaiting brilliant minds.</p>
+    <h1>TCS Open Problems</h1>
+    <p>A curated list of unsolved problems in theoretical computer science.</p>
 </div>
 
 <div class="content-with-sidebar">
     <section class="problems-list">
+        <div class="sort-bar">
+            <span class="sort-label">Sort by:</span>
+            <a href="?sort=votes" class="sort-option {% if current_sort == 'votes' %}active{% endif %}">Votes</a>
+            <a href="?sort=impact" class="sort-option {% if current_sort == 'impact' %}active{% endif %}">Impact</a>
+            <a href="?sort=solvability" class="sort-option {% if current_sort == 'solvability' %}active{% endif %}">Solvability</a>
+        </div>
         {% if problems %}
             {% for item in problems %}
             <article class="problem-card">
+                <div class="vote-section">
+                    {% if current_user %}
+                        <form action="{{ url_for('vote', id=item.problem.id) }}" method="POST">
+                            <button type="submit" class="vote-btn vote-btn-small {% if item.has_voted %}voted{% endif %}">
+                                <span class="vote-arrow">&#9650;</span>
+                                <span class="vote-count">{{ item.vote_count }}</span>
+                            </button>
+                        </form>
+                    {% else %}
+                        <div class="vote-btn vote-btn-small disabled">
+                            <span class="vote-arrow">&#9650;</span>
+                            <span class="vote-count">{{ item.vote_count }}</span>
+                        </div>
+                    {% endif %}
+                </div>
                 <div class="problem-content">
                     <a href="{{ url_for('problem', id=item.problem.id) }}">
                         <h2>{{ item.problem.title }}</h2>
@@ -42,21 +63,6 @@
                         </div>
                         {% if item.rating_count > 0 %}
                             <span class="rating-count">({{ item.rating_count }} rating{% if item.rating_count != 1 %}s{% endif %})</span>
-                        {% endif %}
-                    </div>
-                    <div class="vote-section">
-                        {% if current_user %}
-                            <form action="{{ url_for('vote', id=item.problem.id) }}" method="POST">
-                                <button type="submit" class="vote-btn {% if item.has_voted %}voted{% endif %}">
-                                    <span class="vote-arrow">&#9650;</span>
-                                    <span class="vote-count">{{ item.vote_count }}</span>
-                                </button>
-                            </form>
-                        {% else %}
-                            <div class="vote-btn disabled">
-                                <span class="vote-arrow">&#9650;</span>
-                                <span class="vote-count">{{ item.vote_count }}</span>
-                            </div>
                         {% endif %}
                     </div>
                 </div>

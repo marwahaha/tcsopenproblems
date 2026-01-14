@@ -1,10 +1,25 @@
 {% extends "base.html" %}
 
-{% block title %}{{ problem.title }} - Open Problems{% endblock %}
+{% block title %}{{ problem.title }} - TCS Open Problems{% endblock %}
 
 {% block content %}
 <article class="problem-detail">
     <div class="problem-header">
+        <div class="vote-section">
+            {% if current_user %}
+                <form action="{{ url_for('vote', id=problem.id) }}" method="POST">
+                    <button type="submit" class="vote-btn vote-btn-small {% if has_voted %}voted{% endif %}">
+                        <span class="vote-arrow">&#9650;</span>
+                        <span class="vote-count">{{ vote_count }}</span>
+                    </button>
+                </form>
+            {% else %}
+                <div class="vote-btn vote-btn-small disabled">
+                    <span class="vote-arrow">&#9650;</span>
+                    <span class="vote-count">{{ vote_count }}</span>
+                </div>
+            {% endif %}
+        </div>
         <div class="problem-header-content">
             <h1>{{ problem.title }}</h1>
             {% if categories %}
@@ -33,26 +48,11 @@
                     <span class="rating-count">({{ avg_ratings.count }} rating{% if avg_ratings.count != 1 %}s{% endif %})</span>
                 {% endif %}
             </div>
-            <div class="vote-section large">
-                {% if current_user %}
-                    <form action="{{ url_for('vote', id=problem.id) }}" method="POST">
-                        <button type="submit" class="vote-btn {% if has_voted %}voted{% endif %}">
-                            <span class="vote-arrow">&#9650;</span>
-                            <span class="vote-count">{{ vote_count }}</span>
-                        </button>
-                    </form>
-                {% else %}
-                    <div class="vote-btn disabled">
-                        <span class="vote-arrow">&#9650;</span>
-                        <span class="vote-count">{{ vote_count }}</span>
-                    </div>
-                {% endif %}
-            </div>
         </div>
     </div>
 
     <div class="description">
-        {{ problem.description | safe }}
+        {{ problem.description | markdown }}
     </div>
 
     {% if is_admin %}

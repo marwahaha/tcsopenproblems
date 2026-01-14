@@ -86,6 +86,36 @@ main {
     font-size: 1.1rem;
 }
 
+/* Sort Bar */
+.sort-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.sort-label {
+    color: var(--text-light);
+}
+
+.sort-option {
+    color: var(--text-light);
+    text-decoration: none;
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+}
+
+.sort-option:hover {
+    color: var(--accent);
+}
+
+.sort-option.active {
+    color: var(--accent);
+    background: #e8f4fc;
+}
+
 /* Problem Cards */
 .problems-list {
     display: flex;
@@ -99,7 +129,12 @@ main {
     border: 1px solid var(--border);
     border-radius: 4px;
     display: flex;
+    align-items: flex-start;
     gap: 1rem;
+}
+
+.problem-card > .vote-section {
+    flex-shrink: 0;
 }
 
 .problem-content {
@@ -220,6 +255,18 @@ main {
 
 .vote-section.large .vote-count {
     font-size: 1.1rem;
+}
+
+.vote-btn-small {
+    padding: 0.35rem 0.5rem;
+}
+
+.vote-btn-small .vote-arrow {
+    font-size: 0.8rem;
+}
+
+.vote-btn-small .vote-count {
+    font-size: 0.8rem;
 }
 
 /* Ratings Display */
@@ -366,10 +413,17 @@ main {
 
 .problem-header {
     display: flex;
-    justify-content: space-between;
     align-items: flex-start;
-    gap: 1.5rem;
+    gap: 1rem;
     margin-bottom: 1.5rem;
+}
+
+.problem-header > .vote-section {
+    flex-shrink: 0;
+}
+
+.problem-header .problem-stats {
+    margin-left: auto;
 }
 
 .problem-header-content {
@@ -845,6 +899,11 @@ a.category:hover {
     border-top: 1px solid var(--border);
     display: flex;
     gap: 0.5rem;
+}
+
+.admin-actions .btn-small {
+    min-width: 110px;
+    text-align: center;
 }
 
 .admin-comment-actions {

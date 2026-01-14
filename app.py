@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
+from markupsafe import Markup
 import sqlite3
+import markdown
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 
@@ -7,6 +9,11 @@ app = Flask(__name__)
 app.secret_key = 'dev-key-change-in-production'
 
 DATABASE = 'problems.db'
+
+@app.template_filter('markdown')
+def markdown_filter(text):
+    """Convert markdown text to HTML."""
+    return Markup(markdown.markdown(text))
 
 def get_db():
     conn = sqlite3.connect(DATABASE)
@@ -248,9 +255,18 @@ def logout():
 # Main routes
 @app.route('/')
 def index():
+    sort = request.args.get('sort', 'votes')
     conn = get_db()
-    # Get problems with average ratings, sorted by avg solvability then impact
-    problems = conn.execute('''
+
+    # Determine sort order
+    if sort == 'impact':
+        order_by = 'avg_impact DESC NULLS LAST, p.created_at DESC'
+    elif sort == 'solvability':
+        order_by = 'avg_solvability DESC NULLS LAST, p.created_at DESC'
+    else:
+        order_by = 'vote_count DESC, p.created_at DESC'
+
+    problems = conn.execute(f'''
         SELECT p.*, u.username,
                (SELECT COUNT(*) FROM votes v WHERE v.problem_id = p.id) as vote_count,
                (SELECT AVG(impact) FROM ratings r WHERE r.problem_id = p.id) as avg_impact,
@@ -258,7 +274,7 @@ def index():
                (SELECT COUNT(*) FROM ratings r WHERE r.problem_id = p.id) as rating_count
         FROM problems p
         JOIN users u ON p.user_id = u.id
-        ORDER BY vote_count DESC, p.created_at DESC
+        ORDER BY {order_by}
     ''').fetchall()
 
     user_id = session.get('user_id')
@@ -277,12 +293,22 @@ def index():
         })
     categories = get_all_categories(conn)
     conn.close()
-    return render_template('index.html', problems=problems_with_data, categories=categories)
+    return render_template('index.html', problems=problems_with_data, categories=categories, current_sort=sort)
 
 @app.route('/category/<name>')
 def category(name):
+    sort = request.args.get('sort', 'votes')
     conn = get_db()
-    problems = conn.execute('''
+
+    # Determine sort order
+    if sort == 'impact':
+        order_by = 'avg_impact DESC NULLS LAST, p.created_at DESC'
+    elif sort == 'solvability':
+        order_by = 'avg_solvability DESC NULLS LAST, p.created_at DESC'
+    else:
+        order_by = 'vote_count DESC, p.created_at DESC'
+
+    problems = conn.execute(f'''
         SELECT p.*, u.username,
                (SELECT COUNT(*) FROM votes v WHERE v.problem_id = p.id) as vote_count,
                (SELECT AVG(impact) FROM ratings r WHERE r.problem_id = p.id) as avg_impact,
@@ -293,7 +319,7 @@ def category(name):
         JOIN problem_categories pc ON p.id = pc.problem_id
         JOIN categories c ON pc.category_id = c.id
         WHERE c.name = ?
-        ORDER BY vote_count DESC, p.created_at DESC
+        ORDER BY {order_by}
     ''', (name,)).fetchall()
 
     user_id = session.get('user_id')
@@ -312,7 +338,7 @@ def category(name):
         })
     categories = get_all_categories(conn)
     conn.close()
-    return render_template('category.html', problems=problems_with_data, categories=categories, current_category=name)
+    return render_template('category.html', problems=problems_with_data, categories=categories, current_category=name, current_sort=sort)
 
 @app.route('/problem/<int:id>')
 def problem(id):
