@@ -222,6 +222,119 @@ main {
     font-size: 1.1rem;
 }
 
+/* Ratings Display */
+.problem-stats {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.75rem;
+}
+
+.ratings-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.ratings-display.large {
+    gap: 0.5rem;
+}
+
+.rating-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.rating-label {
+    font-size: 0.7rem;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ratings-display.large .rating-label {
+    font-size: 0.75rem;
+}
+
+.rating-value {
+    font-size: 1rem;
+    font-weight: bold;
+    color: var(--text);
+}
+
+.ratings-display.large .rating-value {
+    font-size: 1.25rem;
+}
+
+.rating-count {
+    font-size: 0.7rem;
+    color: var(--text-light);
+}
+
+/* Rating Section (on problem page) */
+.rating-section {
+    background: var(--card-bg);
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 2rem;
+}
+
+.rating-section h2 {
+    font-size: 1.3rem;
+    font-weight: normal;
+    margin-bottom: 1rem;
+}
+
+.rating-form {
+    margin-bottom: 0.5rem;
+}
+
+.rating-inputs {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 1rem;
+}
+
+.rating-input-group {
+    flex: 1;
+}
+
+.rating-input-group label {
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+}
+
+.rating-hint {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-bottom: 0.5rem;
+}
+
+.rating-input-group select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 1rem;
+    font-family: inherit;
+}
+
+.rating-input-group select:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.your-rating {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    font-style: italic;
+}
+
 /* Problem Detail */
 .problem-detail {
     background: var(--card-bg);

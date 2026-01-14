@@ -19,20 +19,35 @@
                 <span>{{ problem.created_at[:10] }}</span>
             </div>
         </div>
-        <div class="vote-section large">
-            {% if current_user %}
-                <form action="{{ url_for('vote', id=problem.id) }}" method="POST">
-                    <button type="submit" class="vote-btn {% if has_voted %}voted{% endif %}">
+        <div class="problem-stats">
+            <div class="ratings-display large">
+                <div class="rating-item">
+                    <span class="rating-label">Impact</span>
+                    <span class="rating-value">{% if avg_ratings.avg_impact %}{{ avg_ratings.avg_impact }}{% else %}-{% endif %}</span>
+                </div>
+                <div class="rating-item">
+                    <span class="rating-label">Solvability</span>
+                    <span class="rating-value">{% if avg_ratings.avg_solvability %}{{ avg_ratings.avg_solvability }}{% else %}-{% endif %}</span>
+                </div>
+                {% if avg_ratings.count > 0 %}
+                    <span class="rating-count">({{ avg_ratings.count }} rating{% if avg_ratings.count != 1 %}s{% endif %})</span>
+                {% endif %}
+            </div>
+            <div class="vote-section large">
+                {% if current_user %}
+                    <form action="{{ url_for('vote', id=problem.id) }}" method="POST">
+                        <button type="submit" class="vote-btn {% if has_voted %}voted{% endif %}">
+                            <span class="vote-arrow">&#9650;</span>
+                            <span class="vote-count">{{ vote_count }}</span>
+                        </button>
+                    </form>
+                {% else %}
+                    <div class="vote-btn disabled">
                         <span class="vote-arrow">&#9650;</span>
                         <span class="vote-count">{{ vote_count }}</span>
-                    </button>
-                </form>
-            {% else %}
-                <div class="vote-btn disabled">
-                    <span class="vote-arrow">&#9650;</span>
-                    <span class="vote-count">{{ vote_count }}</span>
-                </div>
-            {% endif %}
+                    </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 
@@ -40,6 +55,44 @@
         {{ problem.description | safe }}
     </div>
 </article>
+
+{% if current_user %}
+<section class="rating-section">
+    <h2>Rate This Problem</h2>
+    <form class="rating-form" action="{{ url_for('rate', id=problem.id) }}" method="POST">
+        <div class="rating-inputs">
+            <div class="rating-input-group">
+                <label for="impact">Impact (1-5)</label>
+                <p class="rating-hint">How significant would solving this problem be?</p>
+                <select name="impact" id="impact" required>
+                    <option value="">Select...</option>
+                    {% for i in range(1, 6) %}
+                        <option value="{{ i }}" {% if user_rating and user_rating.impact == i %}selected{% endif %}>{{ i }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="rating-input-group">
+                <label for="solvability">Solvability (1-5)</label>
+                <p class="rating-hint">How likely is this problem to be solved soon?</p>
+                <select name="solvability" id="solvability" required>
+                    <option value="">Select...</option>
+                    {% for i in range(1, 6) %}
+                        <option value="{{ i }}" {% if user_rating and user_rating.solvability == i %}selected{% endif %}>{{ i }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <button type="submit">{% if user_rating %}Update Rating{% else %}Submit Rating{% endif %}</button>
+    </form>
+    {% if user_rating %}
+        <p class="your-rating">Your current rating: Impact {{ user_rating.impact }}, Solvability {{ user_rating.solvability }}</p>
+    {% endif %}
+</section>
+{% else %}
+<section class="rating-section">
+    <p class="login-prompt"><a href="{{ url_for('login') }}">Log in</a> to rate this problem.</p>
+</section>
+{% endif %}
 
 <section class="discussion">
     <h2>Discussion ({{ comments|length }})</h2>

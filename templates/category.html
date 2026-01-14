@@ -30,20 +30,35 @@
                         <span>{{ item.problem.created_at[:10] }}</span>
                     </div>
                 </div>
-                <div class="vote-section">
-                    {% if current_user %}
-                        <form action="{{ url_for('vote', id=item.problem.id) }}" method="POST">
-                            <button type="submit" class="vote-btn {% if item.has_voted %}voted{% endif %}">
+                <div class="problem-stats">
+                    <div class="ratings-display">
+                        <div class="rating-item" title="Impact">
+                            <span class="rating-label">Impact</span>
+                            <span class="rating-value">{% if item.avg_impact %}{{ item.avg_impact }}{% else %}-{% endif %}</span>
+                        </div>
+                        <div class="rating-item" title="Solvability">
+                            <span class="rating-label">Solvability</span>
+                            <span class="rating-value">{% if item.avg_solvability %}{{ item.avg_solvability }}{% else %}-{% endif %}</span>
+                        </div>
+                        {% if item.rating_count > 0 %}
+                            <span class="rating-count">({{ item.rating_count }} rating{% if item.rating_count != 1 %}s{% endif %})</span>
+                        {% endif %}
+                    </div>
+                    <div class="vote-section">
+                        {% if current_user %}
+                            <form action="{{ url_for('vote', id=item.problem.id) }}" method="POST">
+                                <button type="submit" class="vote-btn {% if item.has_voted %}voted{% endif %}">
+                                    <span class="vote-arrow">&#9650;</span>
+                                    <span class="vote-count">{{ item.vote_count }}</span>
+                                </button>
+                            </form>
+                        {% else %}
+                            <div class="vote-btn disabled">
                                 <span class="vote-arrow">&#9650;</span>
                                 <span class="vote-count">{{ item.vote_count }}</span>
-                            </button>
-                        </form>
-                    {% else %}
-                        <div class="vote-btn disabled">
-                            <span class="vote-arrow">&#9650;</span>
-                            <span class="vote-count">{{ item.vote_count }}</span>
-                        </div>
-                    {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
             </article>
             {% endfor %}
