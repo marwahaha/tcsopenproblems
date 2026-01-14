@@ -11,18 +11,22 @@
 <div class="content-with-sidebar">
     <section class="problems-list">
         {% if problems %}
-            {% for problem in problems %}
+            {% for item in problems %}
             <article class="problem-card">
-                <a href="{{ url_for('problem', id=problem.id) }}">
-                    <h2>{{ problem.title }}</h2>
+                <a href="{{ url_for('problem', id=item.problem.id) }}">
+                    <h2>{{ item.problem.title }}</h2>
                 </a>
-                {% if problem.category %}
-                    <a href="{{ url_for('category', name=problem.category) }}" class="category">{{ problem.category }}</a>
+                {% if item.categories %}
+                    <div class="categories">
+                        {% for cat in item.categories %}
+                            <a href="{{ url_for('category', name=cat.name) }}" class="category">{{ cat.name }}</a>
+                        {% endfor %}
+                    </div>
                 {% endif %}
-                <p class="preview">{{ problem.description[:200] }}{% if problem.description|length > 200 %}...{% endif %}</p>
+                <p class="preview">{{ item.problem.description[:200] }}{% if item.problem.description|length > 200 %}...{% endif %}</p>
                 <div class="meta">
-                    <span>by {{ problem.username }}</span>
-                    <span>{{ problem.created_at[:10] }}</span>
+                    <span>by {{ item.problem.username }}</span>
+                    <span>{{ item.problem.created_at[:10] }}</span>
                 </div>
             </article>
             {% endfor %}
@@ -38,7 +42,7 @@
         <h3>Categories</h3>
         <ul class="category-list">
             {% for cat in categories %}
-                <li><a href="{{ url_for('category', name=cat.category) }}">{{ cat.category }}</a></li>
+                <li><a href="{{ url_for('category', name=cat.name) }}">{{ cat.name }}</a></li>
             {% endfor %}
         </ul>
     </aside>

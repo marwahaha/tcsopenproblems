@@ -6,8 +6,12 @@
 <article class="problem-detail">
     <header>
         <h1>{{ problem.title }}</h1>
-        {% if problem.category %}
-            <a href="{{ url_for('category', name=problem.category) }}" class="category">{{ problem.category }}</a>
+        {% if categories %}
+            <div class="categories">
+                {% for cat in categories %}
+                    <a href="{{ url_for('category', name=cat.name) }}" class="category">{{ cat.name }}</a>
+                {% endfor %}
+            </div>
         {% endif %}
         <div class="meta">
             <span>by {{ problem.username }}</span>
