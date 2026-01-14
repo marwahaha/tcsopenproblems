@@ -258,7 +258,7 @@ def index():
                (SELECT COUNT(*) FROM ratings r WHERE r.problem_id = p.id) as rating_count
         FROM problems p
         JOIN users u ON p.user_id = u.id
-        ORDER BY avg_solvability DESC NULLS LAST, avg_impact DESC NULLS LAST, p.created_at DESC
+        ORDER BY vote_count DESC, p.created_at DESC
     ''').fetchall()
 
     user_id = session.get('user_id')
@@ -293,7 +293,7 @@ def category(name):
         JOIN problem_categories pc ON p.id = pc.problem_id
         JOIN categories c ON pc.category_id = c.id
         WHERE c.name = ?
-        ORDER BY avg_solvability DESC NULLS LAST, avg_impact DESC NULLS LAST, p.created_at DESC
+        ORDER BY vote_count DESC, p.created_at DESC
     ''', (name,)).fetchall()
 
     user_id = session.get('user_id')
