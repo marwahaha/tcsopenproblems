@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Edit User - Admin{% endblock %}
+
+{% block content %}
+<div class="admin-page">
+    <h1>Edit User</h1>
+
+    <form class="admin-form" method="POST">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" value="{{ user.username }}" required>
+
+        <label for="password">New Password (leave blank to keep current)</label>
+        <input type="password" id="password" name="password" minlength="4">
+
+        <div class="form-actions">
+            <button type="submit">Save Changes</button>
+            <a href="{{ url_for('admin_dashboard') }}" class="btn-cancel">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

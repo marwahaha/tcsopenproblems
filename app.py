@@ -47,6 +47,7 @@ def init_db():
             username TEXT UNIQUE NOT NULL,
             password_hash TEXT NOT NULL,
             is_admin INTEGER DEFAULT 0,
+            is_approved INTEGER DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
@@ -107,6 +108,16 @@ def init_db():
     # Add is_admin column if it doesn't exist (for existing databases)
     try:
         conn.execute('ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0')
+        conn.commit()
+    except sqlite3.OperationalError:
+        pass  # Column already exists
+
+    # Add is_approved column if it doesn't exist (for existing databases)
+    try:
+        conn.execute('ALTER TABLE users ADD COLUMN is_approved INTEGER DEFAULT 0')
+        conn.commit()
+        # Auto-approve existing users
+        conn.execute('UPDATE users SET is_approved = 1 WHERE is_approved = 0')
         conn.commit()
     except sqlite3.OperationalError:
         pass  # Column already exists
@@ -187,7 +198,8 @@ def inject_user():
     user = get_current_user()
     return {
         'current_user': user,
-        'is_admin': user['is_admin'] if user else False
+        'is_admin': user['is_admin'] if user else False,
+        'is_approved': user['is_approved'] if user else False
     }
 
 def login_required(f):
@@ -196,6 +208,19 @@ def login_required(f):
         if 'user_id' not in session:
             flash('Please log in to continue')
             return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated
+
+def approved_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if 'user_id' not in session:
+            flash('Please log in to continue')
+            return redirect(url_for('login'))
+        user = get_current_user()
+        if not user or not user['is_approved']:
+            flash('Your account is pending approval')
+            return redirect(url_for('index'))
         return f(*args, **kwargs)
     return decorated
 
@@ -240,7 +265,7 @@ def register():
         )
         conn.commit()
         conn.close()
-        flash('Account created! Please log in.')
+        flash('Account created! Please wait for admin approval before logging in.')
         return redirect(url_for('login'))
 
     return render_template('register.html')
@@ -397,7 +422,7 @@ def problem(id):
                          avg_ratings=avg_ratings, user_rating=user_rating)
 
 @app.route('/problem/<int:id>/vote', methods=['POST'])
-@login_required
+@approved_required
 def vote(id):
     conn = get_db()
     user_id = session['user_id']
@@ -414,7 +439,7 @@ def vote(id):
     return redirect(request.referrer or url_for('problem', id=id))
 
 @app.route('/problem/<int:id>/rate', methods=['POST'])
-@login_required
+@approved_required
 def rate(id):
     conn = get_db()
     user_id = session['user_id']
@@ -441,7 +466,7 @@ def rate(id):
     return redirect(url_for('problem', id=id))
 
 @app.route('/submit', methods=['GET', 'POST'])
-@login_required
+@approved_required
 def submit():
     if request.method == 'POST':
         title = request.form['title'].strip()
@@ -467,7 +492,7 @@ def submit():
     return render_template('submit.html')
 
 @app.route('/problem/<int:id>/edit', methods=['GET', 'POST'])
-@login_required
+@approved_required
 def edit_problem(id):
     conn = get_db()
     problem = conn.execute('SELECT * FROM problems WHERE id = ?', (id,)).fetchone()
@@ -509,7 +534,7 @@ def edit_problem(id):
     return render_template('edit_problem.html', problem=problem, category_string=category_string)
 
 @app.route('/problem/<int:id>/comment', methods=['POST'])
-@login_required
+@approved_required
 def add_comment(id):
     content = request.form['content'].strip()
 
@@ -536,8 +561,10 @@ def about():
 def admin_dashboard():
     conn = get_db()
     categories = conn.execute('SELECT * FROM categories ORDER BY name').fetchall()
+    users = conn.execute('SELECT * FROM users WHERE is_approved = 1 ORDER BY created_at DESC').fetchall()
+    pending_users = conn.execute('SELECT * FROM users WHERE is_approved = 0 ORDER BY created_at ASC').fetchall()
     conn.close()
-    return render_template('admin/dashboard.html', categories=categories)
+    return render_template('admin/dashboard.html', categories=categories, users=users, pending_users=pending_users)
 
 @app.route('/admin/problem/<int:id>/edit', methods=['GET', 'POST'])
 @admin_required
@@ -678,6 +705,70 @@ def admin_delete_category(id):
     conn.close()
     flash('Category deleted successfully')
     return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/user/<int:id>/approve', methods=['POST'])
+@admin_required
+def admin_approve_user(id):
+    conn = get_db()
+    conn.execute('UPDATE users SET is_approved = 1 WHERE id = ?', (id,))
+    conn.commit()
+    conn.close()
+    flash('User approved')
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/user/<int:id>/reject', methods=['POST'])
+@admin_required
+def admin_reject_user(id):
+    conn = get_db()
+    # Delete the user entirely
+    conn.execute('DELETE FROM users WHERE id = ? AND is_approved = 0', (id,))
+    conn.commit()
+    conn.close()
+    flash('User rejected and removed')
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/user/<int:id>/edit', methods=['GET', 'POST'])
+@admin_required
+def admin_edit_user(id):
+    conn = get_db()
+    user = conn.execute('SELECT * FROM users WHERE id = ?', (id,)).fetchone()
+    if not user:
+        conn.close()
+        flash('User not found')
+        return redirect(url_for('admin_dashboard'))
+
+    if request.method == 'POST':
+        username = request.form['username'].strip()
+        password = request.form.get('password', '').strip()
+
+        if not username:
+            flash('Username cannot be empty')
+            conn.close()
+            return render_template('admin/edit_user.html', user=user)
+
+        existing = conn.execute('SELECT id FROM users WHERE username = ? AND id != ?', (username, id)).fetchone()
+        if existing:
+            flash('Username already taken')
+            conn.close()
+            return render_template('admin/edit_user.html', user=user)
+
+        if password:
+            if len(password) < 4:
+                flash('Password must be at least 4 characters')
+                conn.close()
+                return render_template('admin/edit_user.html', user=user)
+            conn.execute('UPDATE users SET username = ?, password_hash = ? WHERE id = ?',
+                        (username, generate_password_hash(password), id))
+        else:
+            conn.execute('UPDATE users SET username = ? WHERE id = ?', (username, id))
+
+        conn.commit()
+        conn.close()
+        flash('User updated successfully')
+        return redirect(url_for('admin_dashboard'))
+
+    conn.close()
+    return render_template('admin/edit_user.html', user=user)
 
 if __name__ == '__main__':
     init_db()

@@ -6,6 +6,37 @@
 <div class="admin-page">
     <h1>Admin Dashboard</h1>
 
+    {% if pending_users %}
+    <section class="admin-section">
+        <h2>Pending Approvals</h2>
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Requested</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in pending_users %}
+                <tr>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.created_at[:10] if user.created_at else '' }}</td>
+                    <td class="actions">
+                        <form action="{{ url_for('admin_approve_user', id=user.id) }}" method="POST" class="inline">
+                            <button type="submit" class="btn-small btn-success">Approve</button>
+                        </form>
+                        <form action="{{ url_for('admin_reject_user', id=user.id) }}" method="POST" class="inline" onsubmit="return confirm('Reject and delete this user?');">
+                            <button type="submit" class="btn-small btn-danger">Reject</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+    {% endif %}
+
     <section class="admin-section">
         <h2>Manage Categories</h2>
         {% if categories %}
@@ -32,6 +63,36 @@
             </table>
         {% else %}
             <p>No categories yet.</p>
+        {% endif %}
+    </section>
+
+    <section class="admin-section">
+        <h2>Manage Users</h2>
+        {% if users %}
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Admin</th>
+                        <th>Joined</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.username }}</td>
+                        <td>{{ 'Yes' if user.is_admin else 'No' }}</td>
+                        <td>{{ user.created_at[:10] if user.created_at else '' }}</td>
+                        <td class="actions">
+                            <a href="{{ url_for('admin_edit_user', id=user.id) }}" class="btn-small">Edit</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No users yet.</p>
         {% endif %}
     </section>
 
