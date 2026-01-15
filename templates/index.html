@@ -15,6 +15,7 @@
             <a href="?sort=votes" class="sort-option {% if current_sort == 'votes' %}active{% endif %}">Votes</a>
             <a href="?sort=impact" class="sort-option {% if current_sort == 'impact' %}active{% endif %}">Impact</a>
             <a href="?sort=solvability" class="sort-option {% if current_sort == 'solvability' %}active{% endif %}">Solvability</a>
+            <a href="?sort=date" class="sort-option {% if current_sort == 'date' %}active{% endif %}">Date</a>
         </div>
         {% if problems %}
             {% for item in problems %}

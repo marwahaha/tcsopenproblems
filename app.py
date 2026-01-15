@@ -282,6 +282,8 @@ def index():
         order_by = 'avg_impact DESC NULLS LAST, p.created_at DESC'
     elif sort == 'solvability':
         order_by = 'avg_solvability DESC NULLS LAST, p.created_at DESC'
+    elif sort == 'date':
+        order_by = 'p.created_at DESC'
     else:
         order_by = 'vote_count DESC, p.created_at DESC'
 
@@ -324,6 +326,8 @@ def category(name):
         order_by = 'avg_impact DESC NULLS LAST, p.created_at DESC'
     elif sort == 'solvability':
         order_by = 'avg_solvability DESC NULLS LAST, p.created_at DESC'
+    elif sort == 'date':
+        order_by = 'p.created_at DESC'
     else:
         order_by = 'vote_count DESC, p.created_at DESC'
 
@@ -461,6 +465,48 @@ def submit():
         return redirect(url_for('index'))
 
     return render_template('submit.html')
+
+@app.route('/problem/<int:id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_problem(id):
+    conn = get_db()
+    problem = conn.execute('SELECT * FROM problems WHERE id = ?', (id,)).fetchone()
+    if not problem:
+        conn.close()
+        flash('Problem not found')
+        return redirect(url_for('index'))
+
+    # Check if user owns this problem
+    if problem['user_id'] != session['user_id']:
+        conn.close()
+        flash('You can only edit your own problems')
+        return redirect(url_for('problem', id=id))
+
+    if request.method == 'POST':
+        title = request.form['title'].strip()
+        description = request.form['description'].strip()
+        category_string = request.form.get('categories', '').strip()
+
+        if not title or not description:
+            flash('Title and description are required')
+            categories = get_categories_for_problem(conn, id)
+            category_string = ', '.join([c['name'] for c in categories])
+            conn.close()
+            return render_template('edit_problem.html', problem=problem, category_string=category_string)
+
+        conn.execute('UPDATE problems SET title = ?, description = ? WHERE id = ?',
+                    (title, description, id))
+        conn.execute('DELETE FROM problem_categories WHERE problem_id = ?', (id,))
+        add_categories_to_problem(conn, id, category_string)
+        conn.commit()
+        conn.close()
+        flash('Problem updated successfully')
+        return redirect(url_for('problem', id=id))
+
+    categories = get_categories_for_problem(conn, id)
+    category_string = ', '.join([c['name'] for c in categories])
+    conn.close()
+    return render_template('edit_problem.html', problem=problem, category_string=category_string)
 
 @app.route('/problem/<int:id>/comment', methods=['POST'])
 @login_required
