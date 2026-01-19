@@ -44,13 +44,15 @@
                 <thead>
                     <tr>
                         <th>Category Name</th>
+                        <th>Problems</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for cat in categories %}
                     <tr>
-                        <td>{{ cat.name }}</td>
+                        <td><a href="{{ url_for('category', name=cat.name) }}">{{ cat.name }}</a></td>
+                        <td>{{ cat.problem_count }}</td>
                         <td class="actions">
                             <a href="{{ url_for('admin_edit_category', id=cat.id) }}" class="btn-small">Edit</a>
                             <form action="{{ url_for('admin_delete_category', id=cat.id) }}" method="POST" class="inline" onsubmit="return confirm('Delete this category?');">

@@ -568,7 +568,13 @@ def about():
 @admin_required
 def admin_dashboard():
     conn = get_db()
-    categories = conn.execute('SELECT * FROM categories ORDER BY name').fetchall()
+    categories = conn.execute('''
+        SELECT c.*, COUNT(pc.problem_id) as problem_count
+        FROM categories c
+        LEFT JOIN problem_categories pc ON c.id = pc.category_id
+        GROUP BY c.id
+        ORDER BY c.name
+    ''').fetchall()
     users = conn.execute('SELECT * FROM users WHERE is_approved = 1 ORDER BY created_at DESC').fetchall()
     pending_users = conn.execute('SELECT * FROM users WHERE is_approved = 0 ORDER BY created_at ASC').fetchall()
     conn.close()
