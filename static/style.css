@@ -362,6 +362,22 @@ main {
     margin-bottom: 0.5rem;
 }
 
+.rating-guide {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    margin: 0 0 0.75rem 1rem;
+    padding: 0;
+    list-style: none;
+}
+
+.rating-guide li {
+    margin-bottom: 0.2rem;
+}
+
+.rating-guide strong {
+    color: var(--text);
+}
+
 .rating-input-group select {
     width: 100%;
     padding: 0.5rem;

@@ -82,6 +82,11 @@
             <div class="rating-input-group">
                 <label for="impact">Impact (1-5)</label>
                 <p class="rating-hint">How significant would solving this problem be?</p>
+                <ul class="rating-guide">
+                    <li><strong>1:</strong> Curious result, but not likely to be publishable</li>
+                    <li><strong>3:</strong> Publishable at a decent conference</li>
+                    <li><strong>5:</strong> Top result in the area in the past few years</li>
+                </ul>
                 <select name="impact" id="impact" required>
                     <option value="">Select...</option>
                     {% for i in range(1, 6) %}
@@ -91,7 +96,12 @@
             </div>
             <div class="rating-input-group">
                 <label for="solvability">Solvability (1-5)</label>
-                <p class="rating-hint">How likely is this problem to be solved soon?</p>
+                <p class="rating-hint">Could a PhD student make substantial progress?</p>
+                <ul class="rating-guide">
+                    <li><strong>1:</strong> Plausibly, if you spent your PhD on the problem</li>
+                    <li><strong>3:</strong> Plausibly, within a year</li>
+                    <li><strong>5:</strong> Good problem for an undergraduate</li>
+                </ul>
                 <select name="solvability" id="solvability" required>
                     <option value="">Select...</option>
                     {% for i in range(1, 6) %}
