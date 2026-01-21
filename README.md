@@ -32,7 +32,13 @@ The app will be available at http://localhost:5000
 
 ## Deploying on the server
 
+Go to server for `https://tcsopenproblems.com/`.
+
+If there was a DB change, I like to copy over the database somewhere else just in case.
+
+```
 git pull
+```
 
 then
 
@@ -40,4 +46,3 @@ then
 sudo service tcsopenproblems restart
 ```
 
-If there was a DB change, I like to copy over the database somewhere else just in case.
