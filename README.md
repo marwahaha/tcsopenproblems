@@ -29,3 +29,15 @@ The app will be available at http://localhost:5000
 - Upvoting and rating system (impact/solvability)
 - Comments on problems
 - Admin dashboard for managing content
+
+## Deploying on the server
+
+git pull
+
+then
+
+```
+sudo service tcsopenproblems restart
+```
+
+If there was a DB change, I like to copy over the database somewhere else just in case.
